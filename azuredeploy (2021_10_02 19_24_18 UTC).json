@@ -1,98 +1,129 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "siteName": {
-            "type": "string",
-            "metadata": {
-                "description": "The name of the web app that you wish to create."
-            }
-        },
-        "appServicePlanName": {
-            "type": "string",
-            "metadata": {
-                "description": "The name of the App Service plan to use for hosting the web app."
-            }
-        },
-        "appServiceEnvironmentName": {
-            "type": "string",
-            "metadata": {
-                "description": "The name of the App Service Environment where the app service plan will be created."
-            }
-        },
-        "existingAseLocation": {
-            "type": "string",
-            "metadata": {
-                "description": "Set this to the same location as the App Service Environment"
-            }
-        },
-        "linuxFxVersion": {
-            "type": "string",
-            "defaultValue": "Java|11-java11",
-            "metadata": {
-                "description": "The Runtime stack of current web app"
-            }
-        },
-        "workerPool": {
-            "type": "string",
-            "allowedValues": [
-                "1",
-                "2",
-                "3"
-            ],
-            "defaultValue": 0,
-            "metadata": {
-                "description": "Defines which worker pool's (WP1, WP2 or WP3) resources will be used for the app service plan."
-            }
-        },
-        "numberOfWorkersFromWorkerPool": {
-            "type": "int",
-            "defaultValue": 1,
-            "metadata": {
-                "description": "Defines the number of workers from the worker pool that will be used by the app service plan."
-            }
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webAppName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the App Service resource the execution service will be installed on"
+      }
+    },
+    "createOrUpdateAppServicePlan": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "If set to false, provide the name and resource group of an existing service plan in the 'appServicePlanName' and 'servicePlanResourceGroupName' parameters. Otherwise a new plan will be created with the supplied name"
+      }
+    },
+    "appServicePlanName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('appServiceName'),'Plan')]",
+      "metadata": {
+        "description": "Name for the App Service Plan, defaulting to the value of the App Service's name with 'Plan' appended to the end"
+      }
+    },
+    "appServicePlanSkuName": {
+      "type": "string",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "I1",
+        "I2"
+      ],
+      "metadata": {
+        "description": "Describes plan's pricing tier and capacity. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+      }
+    },
+    "linuxFxVersion": {
+      "type": "string",
+        "defaultValue": "Java|11-java11",
+        "metadata": {
+          "description": "The Runtime stack of current web app"
         }
     },
-    "resources": [
-        {
-            "apiVersion": "2020-12-01",
-            "name": "[parameters('appServicePlanName')]",
-            "type": "Microsoft.Web/serverfarms",
-            "location": "[parameters('existingAseLocation')]",
-            "properties": {
-                "name": "[parameters('appServicePlanName')]",
-                "hostingEnvironmentProfile": {
-                     "id": "[resourceId('Microsoft.Web/hostingEnvironments',parameters('appServiceEnvironmentName'))]",
-                     "reserved": true
-                }
-            },
-            "sku": {
-                "name" : "[concat('I',parameters('workerPool'))]",
-                "tier": "Isolated",
-                "size": "[concat('I',parameters('workerPool'))]",
-                "family": "I",
-                "capacity": "[parameters('numberOfWorkersFromWorkerPool')]"
-            },
-            "kind": "linux"
-        },
-        {
-            "apiVersion": "2020-12-01",
-            "name": "[parameters('siteName')]",
-            "type": "Microsoft.Web/sites",
-            "location": "[parameters('existingAseLocation')]",
-            "properties": {
-                "name": "[parameters('siteName')]",
-                "serverFarmId": "[resourceId('Microsoft.Web/serverFarms',parameters('appServicePlanName'))]",
-                "siteConfig": {
-                    "linuxFxVersion": "[parameters('linuxFxVersion')]"
-                },
-                "hostingEnvironmentProfile": {
-                     "id": "[resourceId('Microsoft.Web/hostingEnvironments', parameters('appServiceEnvironmentName'))]"
-                }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Web/serverFarms/',parameters('appServicePlanName'))]"
-            ]
+    "servicePlanResourceGroupName": {
+      "type": "string",
+      "defaultValue": "pplz-rg-infor-d",
+      "metadata": {
+        "description": "Optional name of the resource group for the existing app service plan. If creating a new plan, leave as the default value"
+      }
+    },
+  "variables": {
+    "appServicePlanName": "[if(empty(parameters('appServicePlanName')), concat(parameters('appServiceName'),'Plan'), parameters('appServicePlanName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2020-06-01",
+      "name": "pid-50659428-9551-4c59-b7a5-79bf3402de4f",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
         }
-    ]
+      }
+    },
+    {
+      "condition": "[parameters('createOrUpdateAppServicePlan')]",
+      "name": "AppServicePlanTemplate",
+      "apiVersion": "2017-05-10",
+      "type": "Microsoft.Resources/deployments",
+      "resourceGroup": "[parameters('servicePlanResourceGroupName')]",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "name": "[variables('appServicePlanName')]",
+              "type": "Microsoft.Web/serverfarms",
+              "apiVersion": "2016-09-01",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "name": "[variables('appServicePlanName')]"
+              },
+              "sku": {
+                "name": "[parameters('appServicePlanSkuName')]"
+              },
+              "kind": "linux"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('webAppName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "app",
+      "dependsOn": [
+        "[resourceId(parameters('servicePlanResourceGroupName'), 'Microsoft.Resources/deployments', 'AppServicePlanTemplate')]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceId(parameters('servicePlanResourceGroupName'), 'Microsoft.Web/serverfarms', variables('appServicePlanName')))]": "Resource"
+      },
+      "properties": {
+        "serverFarmId": "[resourceId(parameters('servicePlanResourceGroupName'), 'Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "siteConfig": {
+          "linuxFxVersion": "[parameters('linuxFxVersion')]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+  }
 }
