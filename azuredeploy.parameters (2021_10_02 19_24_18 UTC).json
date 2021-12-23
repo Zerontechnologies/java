@@ -1,21 +1,15 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "siteName": {
-            "value": "{GEN-UNIQUE-10}"
-        },
-        "appServicePlanName": {
-            "value": "{GEN-UNIQUE-11}"
-        },
-        "appServiceEnvironmentName": {
-            "value": "{GEN-UNIQUE-12}"
-        },
-        "existingAseLocation": {
-            "value": "{GEN-UNIQUE-13}"
-        },
-        "workerPool": {
-            "value": "{GEN-UNIQUE-14}"
-        }
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webAppName": {
+      "value": "hpmpplz"
+    },
+    "appServicePlanSkuName": {
+      "value": "I1"
+    },
+    "appServicePlanName": {
+      "value": "pplz-iasp-t"
     }
+  }
 }
